@@ -17,7 +17,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 # Page Configuration
 st.set_page_config(
     page_title="PBL: CSEB AI Designer",
-    page_icon="🏗️",
+    page_icon=None,
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -54,14 +54,14 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Title and Header
-st.title("🏗️ Sustainable Construction AI: CSEB Designer")
-st.markdown("### 🚀 End-to-End Machine Learning Pipeline for Green Building Materials")
+st.title("Sustainable Construction AI: CSEB Designer")
+st.markdown("### End-to-End Machine Learning Pipeline for Green Building Materials")
 
 # Sidebar Navigation
 with st.sidebar:
     st.image("https://images.unsplash.com/photo-1599690940375-749e793bbce4?q=80&w=2000&auto=format&fit=crop", use_column_width=True)
     st.title("Project Navigator")
-    options = st.radio("Go to", ["1. Project Synopsis", "2. Data Central", "3. Statistical Analysis 3D", "4. Model Arena", "5. Prediction Tool", "6. Smart Mix Optimizer 🌿"])
+    options = st.radio("Go to", ["1. Project Synopsis", "2. Data Central", "3. Statistical Analysis 3D", "4. Model Arena", "5. Prediction Tool", "6. Smart Mix Optimizer"])
     st.info("PBL Project: Sustainable Materials")
 
 # 1. Project Synopsis
@@ -77,7 +77,7 @@ if options == "1. Project Synopsis":
         **Solution**: An intelligent "Virtual Lab" that predicts block strength instantly and **optimizes mix ratios** for sustainability.
         """)
         
-        st.markdown("### 🎯 Objectives")
+        st.markdown("### Objectives")
         st.markdown("""
         - **Analyze**: Discover how soil grading impacts strength.
         - **Predict**: Train ML models (RF, ANN) to forecast performance.
@@ -93,10 +93,10 @@ elif options == "2. Data Central":
     
     col1, col2 = st.columns(2)
     with col1:
-        uploaded_file = st.file_uploader("📥 Upload Lab CSV", type=["csv"])
+        uploaded_file = st.file_uploader("Upload Lab CSV", type=["csv"])
     
     with col2:
-        st.markdown("#### ⚡ Quick Load")
+        st.markdown("#### Quick Load")
         if st.button("Load Synthetic Data (CSEB Default)"):
             try:
                 df = pd.read_csv("cseb_dataset.csv")
@@ -117,13 +117,13 @@ elif options == "2. Data Central":
         st.session_state['data'] = pd.read_csv(uploaded_file)
             
     if 'data' in st.session_state:
-        st.markdown("### 📊 Dataset Overview")
+        st.markdown("### Dataset Overview")
         st.dataframe(st.session_state['data'].head(), use_container_width=True)
         st.write(st.session_state['data'].describe())
 
 # 3. Statistical Analysis
 elif options == "3. Statistical Analysis 3D":
-    st.header("🔬 Advanced Exploratory Analysis")
+    st.header("Advanced Exploratory Analysis")
     
     if 'data' not in st.session_state:
         st.error("Please load data first.")
@@ -169,7 +169,7 @@ elif options == "3. Statistical Analysis 3D":
 
 # 4. Model Arena
 elif options == "4. Model Arena":
-    st.header("⚔️ Model Arena: Algorithm Comparison")
+    st.header("Model Arena: Algorithm Comparison")
     
     if 'data' not in st.session_state:
         st.error("Load data first.")
@@ -225,7 +225,7 @@ elif options == "4. Model Arena":
 
 # 5. Prediction Tool
 elif options == "5. Prediction Tool":
-    st.header("🔮 Virtual Lab: Strength Predictor")
+    st.header("Virtual Lab: Strength Predictor")
     
     if 'trained_model' not in st.session_state:
         st.warning("Train a model first!")
@@ -253,15 +253,15 @@ elif options == "5. Prediction Tool":
             st.metric(label="Predicted Compressive Strength", value=f"{pred:.2f} MPa")
             
             if pred > 7:
-                 st.success("✅ Meets Structural Standards (e.g., 7 MPa for load-bearing).")
+                 st.success("Meets Structural Standards (e.g., 7 MPa for load-bearing).")
             elif pred > 3.5:
-                 st.info("🟡 Suitable for non-load-bearing or low-stress applications.")
+                 st.info("Suitable for non-load-bearing or low-stress applications.")
             else:
-                 st.warning("⚠️ Below typical structural standards. Consider increasing stabilizer or compaction.")
+                 st.warning("Below typical structural standards. Consider increasing stabilizer or compaction.")
 
 # 6. Smart Mix Optimizer
-elif options == "6. Smart Mix Optimizer 🌿":
-    st.header("🌿 Eco-Smart Mix Optimizer")
+elif options == "6. Smart Mix Optimizer":
+    st.header("Eco-Smart Mix Optimizer")
     st.markdown("""
     **The Problem**: "I need a block with **7 MPa** strength. What is the *minimum* cement I can use to save money and CO2?"
     
@@ -317,7 +317,7 @@ elif options == "6. Smart Mix Optimizer 🌿":
                 best_mix = valid_mixes.sort_values(by=cement_col).iloc[0]
                 
                 st.success(f"Found {len(valid_mixes)} valid formulas!")
-                st.subheader("🏆 The Golden Recipe (Lowest Eco-Impact)")
+                st.subheader("The Golden Recipe (Lowest Eco-Impact)")
                 
                 # Show results nicely
                 col_res1, col_res2 = st.columns([1, 2])
