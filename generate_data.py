@@ -65,6 +65,28 @@ def generate_synthetic_data(n_samples=100):
     
     return data
 
+def get_real_data():
+    """
+    Downloads the 'Concrete Compressive Strength' dataset from a public repository.
+    This serves as a real-world proxy for the CSEB dataset.
+    """
+    url = "https://raw.githubusercontent.com/stedy/Machine-Learning-with-R-datasets/master/concrete.csv"
+    try:
+        print(f"Downloading data from {url}...")
+        df = pd.read_csv(url)
+        # Rename columns to match our expected format somewhat, or keep as is and let the app handle it
+        # The UCI dataset has columns like: cement, slag, ash, water, superplastic, coarseagg, fineagg, age, strength
+        # We will map them to friendly names
+        df.columns = [
+            'Cement_kg_m3', 'Blast_Furnace_Slag_kg_m3', 'Fly_Ash_kg_m3', 
+            'Water_kg_m3', 'Superplasticizer_kg_m3', 'Coarse_Aggregate_kg_m3', 
+            'Fine_Aggregate_kg_m3', 'Age_Days', 'Compressive_Strength_MPa'
+        ]
+        return df
+    except Exception as e:
+        print(f"Error downloading real data: {e}")
+        return None
+
 if __name__ == "__main__":
     df = generate_synthetic_data(150)
     df.to_csv('cseb_dataset.csv', index=False)

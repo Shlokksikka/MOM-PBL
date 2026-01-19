@@ -52,24 +52,39 @@ if options == "Project Info":
 elif options == "Data Collection":
     st.header("Data Collection & Preview")
     
-    st.markdown("Load the dataset containing soil properties and process parameters.")
+    st.markdown("Load the dataset containing soil properties/mix design and the target strength.")
     
-    # Upload functionality
-    uploaded_file = st.file_uploader("Upload CSV Dataset", type=["csv"])
+    col1, col2 = st.columns(2)
     
+    with col1:
+        # Upload functionality
+        uploaded_file = st.file_uploader("Option A: Upload Your CSV", type=["csv"])
+    
+    with col2:
+        st.markdown("**Option B: Use Available Datasets**")
+        if st.button("Load Synthetic CSEB Data"):
+            try:
+                # Fallback to local generated file if available
+                df = pd.read_csv("cseb_dataset.csv")
+                st.session_state['data'] = df
+                st.success("Loaded Synthetic CSEB Data.")
+            except FileNotFoundError:
+                st.error("File not found. Run generate_data.py first.")
+        
+        if st.button("Load Real-World Concrete Data (UCI Proxy)"):
+            from generate_data import get_real_data
+            with st.spinner("Downloading from UCI Repository..."):
+                real_df = get_real_data()
+                if real_df is not None:
+                    st.session_state['data'] = real_df
+                    st.success("Loaded Real-World Data from UCI Repository.")
+                else:
+                    st.error("Failed to download data.")
+
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
         st.session_state['data'] = df
-        st.success("Dataset uploaded successfully!")
-    else:
-        st.warning("No file uploaded. Using synthetic dataset for demonstration.")
-        try:
-            # Fallback to local generated file if available
-            df = pd.read_csv("cseb_dataset.csv")
-            st.session_state['data'] = df
-        except FileNotFoundError:
-            st.error("Synthetic data file 'cseb_dataset.csv' not found. Please upload a file or run generate_data.py.")
-            st.stop()
+        st.success("Custom dataset uploaded successfully!")
             
     if 'data' in st.session_state:
         st.subheader("Dataset Preview")
@@ -78,33 +93,68 @@ elif options == "Data Collection":
         st.subheader("Dataset Statistics")
         st.write(st.session_state['data'].describe())
 
-# 3. Data Analysis (EDA)
+# 3. Statistical Analysis & EDA
 elif options == "Data Analysis (EDA)":
-    st.header("Exploratory Data Analysis")
+    st.header("Statistical Analysis & Methodology")
+    st.markdown("""
+    This section applies rigorous statistical methods to understand the data before modeling. 
+    We look for **Linear Relationships (Correlation)**, **Data Distribution (Normality)**, and **Outliers**.
+    """)
     
     if 'data' not in st.session_state:
         st.error("Please load data in the 'Data Collection' tab first.")
     else:
         df = st.session_state['data']
         
+        # A. Descriptive Statistics
+        st.subheader("1. Descriptive Statistics")
+        st.markdown("**Why it matters:** deviations in Mean vs Median can indicate skewness. High Standard Deviation implies high variability.")
+        st.dataframe(df.describe().T.style.background_gradient(cmap='Blues'))
+        
         col1, col2 = st.columns(2)
         
+        # B. Correlation Analysis
         with col1:
-            st.subheader("Correlation Heatmap")
-            fig, ax = plt.subplots()
-            sns.heatmap(df.corr(), annot=True, fmt=".2f", cmap="coolwarm", ax=ax, annot_kws={"size": 8})
-            st.pyplot(fig)
+            st.subheader("2. Pearson Correlation Matrix")
+            st.markdown("**Objective:** Identify which features (inputs) satisfy the linear assumption with Strength.")
             
+            # Select numeric columns only
+            numeric_df = df.select_dtypes(include=[np.number])
+            corr_matrix = numeric_df.corr()
+            
+            fig, ax = plt.subplots(figsize=(10, 8))
+            sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap="coolwarm", ax=ax, cbar=True)
+            st.pyplot(fig)
+            st.info("Values closer to **1.0** or **-1.0** indicate strong predictors.")
+            
+        # C. Distribution Analysis
         with col2:
-            st.subheader("Target Distribution")
+            st.subheader("3. Target Distribution Analysis")
+            st.markdown("**Objective:** Check for Normality (Gaussian Distribution). ML models assume normally distributed errors.")
+            
+            target_col = 'Compressive_Strength_MPa'
+            if target_col not in df.columns:
+                target_col = df.columns[-1] # Fallback to last column
+            
             fig2, ax2 = plt.subplots()
-            sns.histplot(df['Compressive_Strength_MPa'], kde=True, color='green', ax=ax2)
+            sns.histplot(df[target_col], kde=True, color='purple', ax=ax2)
+            ax2.set_title(f"Distribution of {target_col}")
             st.pyplot(fig2)
             
-        st.subheader("Variable vs Strength")
-        feature_to_plot = st.selectbox("Select Feature to plot against Strength", df.columns[:-1])
+            skewness = df[target_col].skew()
+            st.metric("Skewness", f"{skewness:.4f}", delta_color="inverse")
+            if abs(skewness) > 1:
+                st.warning("Data is highly skewed. Consider Log-Transformation.")
+            else:
+                st.success("Distribution is relatively normal.")
+
+        # D. Bivariate Analysis
+        st.subheader("4. Feature vs. Strength Interaction")
+        feature_to_plot = st.selectbox("Select Feature to Analyze", df.columns[:-1])
+        
         fig3, ax3 = plt.subplots()
-        sns.scatterplot(data=df, x=feature_to_plot, y='Compressive_Strength_MPa', ax=ax3)
+        sns.scatterplot(data=df, x=feature_to_plot, y=target_col, hue=target_col, palette="viridis", ax=ax3)
+        ax3.set_title(f"{feature_to_plot} vs {target_col}")
         st.pyplot(fig3)
 
 # 4. Model Training
