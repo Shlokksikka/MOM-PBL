@@ -21,7 +21,7 @@ def generate_synthetic_data(n_samples=100):
     # Atterberg Limits
     liquid_limit = np.random.uniform(20, 50, n_samples)
     plastic_limit = np.random.uniform(10, 30, n_samples)
-    // Plasticity Index cannot be negative
+    # Plasticity Index cannot be negative
     plasticity_index = np.maximum(liquid_limit - plastic_limit, 0)
     
     # Mix parameters
