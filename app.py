@@ -64,6 +64,37 @@ with st.sidebar:
     options = st.radio("Go to", ["1. Project Synopsis", "2. Data Central", "3. Statistical Analysis 3D", "4. Model Arena", "5. Prediction Tool", "6. Smart Mix Optimizer"])
     st.info("PBL Project: Sustainable Materials")
 
+# --- AUTO-SETUP LOGIC ---
+# Automatically load data and train model if not present
+if 'data' not in st.session_state:
+    try:
+        # Try loading default synthetic data
+        st.session_state['data'] = pd.read_csv("cseb_dataset.csv")
+    except:
+        pass # Handle elegantly if file doesn't exist
+
+if 'data' in st.session_state and 'trained_model' not in st.session_state:
+    # Auto-train a default Random Forest model so users don't hit walls
+    df = st.session_state['data']
+    target = 'Compressive_Strength_MPa'
+    if target in df.columns:
+        features = df.columns.drop(target)
+        X = df[features]
+        y = df[target]
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X)
+        
+        # Train
+        model = RandomForestRegressor(n_estimators=100, random_state=42)
+        model.fit(X_scaled, y)
+        
+        # Save to session
+        st.session_state['trained_model'] = model
+        st.session_state['scaler'] = scaler
+        st.session_state['feature_names'] = features
+        st.session_state['target_name'] = target
+# ------------------------
+
 # 1. Project Synopsis
 if options == "1. Project Synopsis":
     st.header("Project Synopsis")
