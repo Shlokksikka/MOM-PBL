@@ -330,4 +330,4 @@ elif options == "6. Smart Mix Optimizer 🌿":
                     # Display only the feature columns and predicted strength
                     display_mix = best_mix[feats.tolist() + ['Predicted_Strength']].to_frame().T
                     st.dataframe(display_mix.style.format("{:.2f}"), use_container_width=True)
-```
+
